@@ -1,0 +1,45 @@
+version: '3'
+
+networks:
+  nginx_network:
+    driver: bridge
+
+  isolated_network_1:
+    driver: bridge
+    internal: true
+
+  isolated_network_2:
+    driver: bridge
+    internal: true
+
+services:
+  nginx_container:
+    image: nginx:latest
+    networks:
+      - nginx_network
+      - isolated_network_1
+      - isolated_network_2
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/
+
+  first_responder:
+    container_name: first_responder
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    networks:
+      - isolated_network_1
+    ports:
+      - "5001:5000"
+
+  second_responder:
+    container_name: second_responder
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    networks:
+      - isolated_network_2
+    ports:
+      - "5002:5000"
